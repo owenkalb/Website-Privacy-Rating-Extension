@@ -2,9 +2,10 @@
   "manifest_version": 3,
   "name": "Privacy Rater",
   "version": "1.1",
-  "description": "Rates website privacy policies using AI or ToS;DR data.",
+  "description": "Rates website privacy policies using AI.",
   "permissions": ["activeTab", "scripting"],
-  "host_permissions": ["<all_urls>"],
+"host_permissions": ["<all_urls>", "https://openrouter.ai/*"]
+,
   "background": {
     "service_worker": "background.js"
   },
@@ -12,4 +13,5 @@
     "default_popup": "popup.html",
     "default_title": "Check Privacy Rating"
   }
+  
 }
