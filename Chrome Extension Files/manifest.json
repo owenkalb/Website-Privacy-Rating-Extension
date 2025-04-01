@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Privacy Rater",
-  "version": "1.0",
-  "description": "Rates a website's privacy policy based on detected terms.",
+  "version": "1.1",
+  "description": "Rates website privacy policies using AI or ToS;DR data.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
+    "default_popup": "popup.html",
     "default_title": "Check Privacy Rating"
   }
 }

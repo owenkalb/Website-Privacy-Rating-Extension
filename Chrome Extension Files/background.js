@@ -1,40 +1,42 @@
-
-
-// background.js
-chrome.action.onClicked.addListener((tab) => {
-  chrome.scripting.executeScript({
-    target: {tabId: tab.id},
-    function: analyzePrivacyPolicy
-  });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "ai_analysis") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        function: analyzePrivacyPolicy
+      });
+    });
+  } 
 });
 
 function analyzePrivacyPolicy() {
   const privacyKeywords = {
-    "good": [
-      "encrypted", "protected", "GDPR", "CCPA", "data protection", "privacy policy", 
-      "user consent", "no third-party", "no tracking", "anonymized", "secure", "confidential"
-    ],
-    "bad": [
-      "sell data", "third-party", "tracking", "advertisers", "data sharing", "cookies", 
-      "personal information", "data collection", "profiling", "behavioral advertising", "data brokers"
-    ]
+    good: ["encrypted", "protected", "gdpr", "ccpa", "no tracking", "anonymized", "secure"],
+    bad: ["sell data", "third-party", "tracking", "advertisers", "data brokers"]
   };
 
   let bodyText = document.body.innerText.toLowerCase();
   let goodScore = privacyKeywords.good.filter(word => bodyText.includes(word)).length;
   let badScore = privacyKeywords.bad.filter(word => bodyText.includes(word)).length;
 
-  // Calculate total score out of 100
-  let totalScore = (goodScore - badScore) * 10;
-  if (totalScore > 100) totalScore = 100;
-  if (totalScore < 0) totalScore = 0;
+  let totalScore = 50 + (goodScore * 10) - (badScore * 10);
+  totalScore = Math.max(0, Math.min(100, totalScore));
 
-  let rating = "Neutral";
-  if (totalScore > 70) rating = "Excellent Privacy";
-  else if (totalScore > 40) rating = "Good Privacy";
-  else if (totalScore > 20) rating = "Fair Privacy";
-  else rating = "Poor Privacy";
+  let rating = totalScore > 70 ? "Excellent Privacy" :
+               totalScore > 50 ? "Good Privacy" :
+               totalScore > 30 ? "Fair Privacy" : "Poor Privacy";
 
-  alert(`Privacy Rating: ${rating}\nTotal Score: ${totalScore}\nGood Mentions: ${goodScore}\nBad Mentions: ${badScore}`);
+  let explanation = "Privacy rating based on detected terms:\n";
+  privacyKeywords.good.forEach(word => {
+    if (bodyText.includes(word)) explanation += `+ ${word} detected\n`;
+  });
+  privacyKeywords.bad.forEach(word => {
+    if (bodyText.includes(word)) explanation += `- ${word} detected\n`;
+  });
+
+  if (explanation === "Privacy rating based on detected terms:\n") explanation += "No relevant privacy terms detected.\n";
+
+  chrome.runtime.sendMessage({
+    result: `AI Privacy Rating: ${rating} (${totalScore}%)\n\n${explanation}`
+  });
 }
-
