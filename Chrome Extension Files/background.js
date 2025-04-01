@@ -14,10 +14,19 @@ async function analyzePrivacyPolicy() {
   const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
   
   // Extract webpage text
-  let bodyText = document.body.innerText.slice(0, 8000); // Limit to 4000 chars to fit API limits
+  let bodyText = document.body.innerText.slice(0, 5000); // 
 
   const requestBody = {
-    model: "mistralai/mistral-7b-instruct:free", 
+  // Available AI models (Uncomment the one you want to use)
+    // "model": "mistralai/mistral-7b-instruct:free",
+    // "model": "google/gemini-pro:free",
+    //"model": "anthropic/claude-instant:free",
+    // "model": "deepseek-ai/deepseek-llm-67b-chat",
+    // "model": "cohere/command-r-plus:free",
+    // "model": "meta/llama-3-70b-instruct",
+     "model": "openai/gpt-3.5-turbo-1106",
+    // "model": "meta/llama-2-70b-chat",
+    // "model": "huggingfaceh4/zephyr-7b-alpha",
     messages: [
       { 
         "role": "system", 
@@ -34,14 +43,7 @@ async function analyzePrivacyPolicy() {
         - "User data is anonymized"
         - "Data retention policy: [Short duration]"
         - "Users can request data deletion"
-        - "Data is securely stored"
-        - "No sharing of sensitive information"
-        - "Opt-out of data collection"
-        - "Clear and understandable privacy policy"
-        - "Regular policy reviews"
-        - "User consent required for data processing"
-        - "Clear user rights regarding data use"
-
+  
         **Bad Policies**:
         - "Data shared with affiliates/partners"
         - "Third-party tracking"
@@ -49,13 +51,7 @@ async function analyzePrivacyPolicy() {
         - "May collect browsing history"
         - "Personal data used for targeted ads"
         - "Changes policy without notice"
-        - "Lack of transparency in data usage"
-        - "No user control over data sharing"
-        - "Overly complicated privacy terms"
-        - "Selling user data"
-        - "Data shared with advertisers"
-        - "Opt-out difficult or unclear"
-        
+  
         **Scoring Rules**:
         - Frequent use of **good indicators** increases the score.
         - Frequent use of **bad indicators** decreases the score.
@@ -64,9 +60,31 @@ async function analyzePrivacyPolicy() {
         **Privacy Policy to Analyze**:\n\n${bodyText}`
       }
     ],
-};
+  };
+  // API call with error handling
+fetch(apiUrl, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(requestBody),
+})
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("API limit reached or service unavailable.");
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Response:", data);
+  })
+  .catch(error => {
+    console.error("Error:", error.message);
+    
+    // Send a message when API call fails
+    document.body.innerHTML = "<h2>Results For Webpage Privacy Rating:</h2><p>Could not analyze the privacy policy. API limit may be reached.</p>";
 
-  
+    // Optional: Alert the user
+    alert("API limit reached. Try switching to another model or waiting for the quota reset.");
+  });
   
   try {
     const response = await fetch(apiUrl, {
