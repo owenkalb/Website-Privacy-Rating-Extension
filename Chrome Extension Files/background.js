@@ -20,6 +20,7 @@ async function analyzePrivacyPolicy() {
     
   // Available AI models (Uncomment the one you want to use)
     "model": "mistralai/mistral-7b-instruct:free",
+    // "model": "deepseek/deepseek-v3-base:free",
     // "model": "google/gemini-pro:free",
     // "model": "anthropic/claude-instant:free",
     // "model": "deepseek-ai/deepseek-llm-67b-chat",
