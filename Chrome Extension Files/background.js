@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         function: analyzePrivacyPolicy
       });
     });
-  } 
+  }
 });
 
 async function analyzePrivacyPolicy() {
@@ -14,51 +14,18 @@ async function analyzePrivacyPolicy() {
   const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
   
   // Extract webpage text
-  let bodyText = document.body.innerText.slice(0, 5000); // 
+  let bodyText = document.body.innerText.slice(0, 5000); // Limiting to first 5000 characters
 
   const requestBody = {
-    
-  // Available AI models (Uncomment the one you want to use)
-    "model": "mistralai/mistral-7b-instruct:free",
-    // "model": "google/gemini-pro:free",
-    // "model": "anthropic/claude-instant:free",
-    // "model": "deepseek-ai/deepseek-llm-67b-chat",
-    // "model": "cohere/command-r-plus:free",
-    // "model": "meta/llama-3-70b-instruct",
-    // "model": "openai/gpt-3.5-turbo-1106",
-    // "model": "meta/llama-2-70b-chat",
-    // "model": "huggingfaceh4/zephyr-7b-alpha",
+    model: "mistralai/mistral-7b-instruct:free", 
     messages: [
       { 
         "role": "system", 
-        "content": "Analyze website privacy policies using objective criteria. Identify key terms that indicate strong or weak privacy practices. Adjust the rating based on repeated usage of positive or negative phrases. Format the response exactly as follows:\n\nRating: x/10\n\nGood:\n* [positive aspect]\n* [positive aspect]\n\nBad:\n* [negative aspect]\n* [negative aspect]\n\nSummary:\n[Short reason for score, highlighting main issue].\n\nDo not use first-person language."
+        "content": "You are a privacy policy analyst. Your task is to rate a website's privacy practices objectively and critically, based on the content of the privacy policy. Use the following scoring rubric to assess the privacy policy:\n\n**Scoring Rules**:\n- Start at 10/10.\n- Subtract points for poor privacy practices (such as data sharing, tracking, lack of transparency, etc.).\n- Add points for good practices (such as strong encryption, clear opt-outs, no data sharing, etc.).\n- Adjust the score based on the overall strength and clarity of the privacy practices.\n\nProvide a rating and a summary that explains the score in a clear and concise manner.\n\nFormat your response exactly like this:\n\nRating: x/10\n\nGood:\n* [positive aspect]\n* [positive aspect]\n\nBad:\n* [negative aspect]\n* [negative aspect]\n\nSummary:\n[Short summary explaining the score. Be objective, concise, and avoid first-person language.]"
       },
       { 
         "role": "user", 
-        "content": `Analyze the following privacy policy and provide a rating (1-10) based on privacy protection. Highlight key terms and adjust the score based on repetition.\n\n
-        
-        **Good Policies**:
-        - "End-to-end encryption"
-        - "No data sharing with third parties"
-        - "Minimal data collection"
-        - "User data is anonymized"
-        - "Data retention policy: [Short duration]"
-        - "Users can request data deletion"
-  
-        **Bad Policies**:
-        - "Data shared with affiliates/partners"
-        - "Third-party tracking"
-        - "Retains data indefinitely"
-        - "May collect browsing history"
-        - "Personal data used for targeted ads"
-        - "Changes policy without notice"
-  
-        **Scoring Rules**:
-        - Frequent use of **good indicators** increases the score.
-        - Frequent use of **bad indicators** decreases the score.
-        - If both good and bad terms appear, adjust accordingly.
-  
-        **Privacy Policy to Analyze**:\n\n${bodyText}`
+        "content": `Analyze the following privacy policy and provide a rating (1-10) based on privacy protection practices. Provide key insights based on the practices mentioned in the policy.\n\n**Privacy Policy to Analyze**:\n\n${bodyText}`
       }
     ],
   };
@@ -84,4 +51,3 @@ async function analyzePrivacyPolicy() {
     chrome.runtime.sendMessage({ result: "Error: Unable to get a privacy rating." });
   }
 }
-
