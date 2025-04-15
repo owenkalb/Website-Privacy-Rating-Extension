@@ -1,19 +1,281 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Privacy Rater</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; width: 250px; border-radius: 1px; border: 2px solid black; padding: 20px; background-color: #f9f9f9; }
-    button { margin: 10px; padding: 10px; width: 80%; cursor: pointer; }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
-    #result { margin-top: 10px; font-weight: bold; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      width: 350px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+      color: #2a3990;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+    }
+
+    button {
+      background-color: #4354b2;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #3a47a0;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .secondary-button {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    .secondary-button:hover {
+      background-color: #d0d0d0;
+    }
+
+    .rating-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .rating-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      margin-right: 15px;
+      position: relative;
+    }
+
+    .rating-label {
+      font-size: 12px;
+      position: absolute;
+      bottom: -20px;
+      width: 100%;
+      text-align: center;
+      color: #333;
+    }
+
+    .rating-details {
+      flex: 1;
+    }
+
+    .rating-category {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .good {
+      color: #28a745;
+    }
+
+    .bad {
+      color: #dc3545;
+    }
+
+    #result-container {
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #4354b2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .info-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    #status-message {
+      font-style: italic;
+    }
+
+    #url-display {
+      font-weight: bold;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+
+    #warning-message {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+      display: none;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+
+    /* Debug panel styles */
+    #debug-section {
+      margin-top: 15px;
+      border-top: 1px dashed #ccc;
+      padding-top: 10px;
+    }
+
+    #debug-toggle {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 11px;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      display: block;
+      margin: 0 auto;
+    }
+
+    #debug-container {
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      height: 150px;
+      overflow-y: auto;
+      display: none;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
+
 <body>
-  <h2>Privacy Rater</h2>
-  <button id="aiButton">Website Analysis</button>
-  <div id="result">Click the button to analyze</div>
+  <header>
+    <h1>Privacy Rater</h1>
+    <div class="subtitle">Analyze website privacy practices</div>
+  </header>
+
+  <div id="warning-message"></div>
+
+  <div class="action-bar">
+    <button id="analyzeButton">Analyze This Page</button>
+    <button id="toggleDetailsButton" class="secondary-button" disabled>Show Details</button>
+  </div>
+
+  <div id="loading" class="loading" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Analyzing privacy practices...</p>
+  </div>
+
+  <div id="rating-summary" style="display: none;">
+    <div class="rating-display">
+      <div id="rating-circle" class="rating-circle">
+        <span id="rating-value">-</span>
+        <div class="rating-label">Privacy Score</div>
+      </div>
+      <div class="rating-details">
+        <div id="good-practices" class="rating-category good"></div>
+        <div id="bad-practices" class="rating-category bad"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="result-container"></div>
+
+  <div class="info-bar">
+    <div id="status-message">Ready to analyze</div>
+    <div id="url-display"></div>
+  </div>
+
+  <div id="debug-section">
+    <button id="debug-toggle" type="button">Show Debug Info</button>
+    <div id="debug-container"></div>
+  </div>
 
   <script src="popup.js"></script>
+  <script>
+    // Simple debug panel toggle
+    document.getElementById('debug-toggle').addEventListener('click', function() {
+      const debugContainer = document.getElementById('debug-container');
+      const isVisible = debugContainer.style.display === 'block';
+      debugContainer.style.display = isVisible ? 'none' : 'block';
+      this.textContent = isVisible ? 'Show Debug Info' : 'Hide Debug Info';
+    });
+  </script>
 </body>
 </html>
