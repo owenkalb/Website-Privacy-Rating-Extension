@@ -1,5 +1,5 @@
 // Constants
-const API_KEY = "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";
+const API_KEY = "<your api key here>";
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MAX_CHARS = 4000;
 const STORAGE_KEY = "privacyRatings";
